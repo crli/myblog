@@ -1,4 +1,11 @@
-import api from './index'
+/*
+ * @Author: crli
+ * @Date: 2020-04-20 16:01:51
+ * @LastEditors: crli
+ * @LastEditTime: 2020-04-21 09:50:47
+ * @Description: file content
+ */
+// import api from './index'
 import { axios } from '@/utils/request'
 
 /**
@@ -14,19 +21,25 @@ import { axios } from '@/utils/request'
  */
 export function login (parameter) {
   return axios({
-    url: '/auth/login',
+    url: `/auth/login`,
     method: 'post',
     data: parameter
   })
 }
-
-export function getSmsCaptcha (parameter) {
+export function register (parameter) {
   return axios({
-    url: api.SendSms,
+    url: `/auth/register`,
     method: 'post',
     data: parameter
   })
 }
+// export function getSmsCaptcha (parameter) {
+//   return axios({
+//     url: api.SendSms,
+//     method: 'post',
+//     data: parameter
+//   })
+// }
 
 export function getInfo () {
   return axios({
@@ -38,12 +51,12 @@ export function getInfo () {
   })
 }
 
-export function getCurrentUserNav (token) {
-  return axios({
-    url: '/user/nav',
-    method: 'get'
-  })
-}
+// export function getCurrentUserNav (token) {
+//   return axios({
+//     url: '/user/nav',
+//     method: 'get'
+//   })
+// }
 
 export function logout () {
   return axios({
@@ -55,14 +68,14 @@ export function logout () {
   })
 }
 
-/**
- * get user 2step code open?
- * @param parameter {*}
- */
-export function get2step (parameter) {
-  return axios({
-    url: api.twoStepCode,
-    method: 'post',
-    data: parameter
-  })
-}
+// /**
+//  * get user 2step code open?
+//  * @param parameter {*}
+//  */
+// export function get2step (parameter) {
+//   return axios({
+//     url: api.twoStepCode,
+//     method: 'post',
+//     data: parameter
+//   })
+// }

@@ -1,3 +1,10 @@
+/*
+ * @Author: crli
+ * @Date: 2020-04-20 16:01:52
+ * @LastEditors: crli
+ * @LastEditTime: 2020-04-21 09:49:36
+ * @Description: file content
+ */
 import Vue from 'vue'
 import router from './router'
 import store from './store'
@@ -26,7 +33,8 @@ router.beforeEach((to, from, next) => {
         store
           .dispatch('GetInfo')
           .then(res => {
-            const roles = res.result && res.result.role
+            console.log(res)
+            const roles = res.data && res.data.role
             store.dispatch('GenerateRoutes', { roles }).then(() => {
               // 根据roles权限生成可访问的路由表
               // 动态添加可访问路由表

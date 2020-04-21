@@ -1,3 +1,10 @@
+<!--
+ * @Author: crli
+ * @Date: 2020-04-21 09:46:27
+ * @LastEditors: crli
+ * @LastEditTime: 2020-04-21 09:49:46
+ * @Description: file content
+ -->
 <template>
   <a-locale-provider :locale="locale">
     <div id="app">
@@ -18,7 +25,7 @@ export default {
     }
   },
   mounted () {
-
+    console.log(this.$store.state)
   }
 }
 </script>

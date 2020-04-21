@@ -1,5 +1,12 @@
+/*
+ * @Author: crli
+ * @Date: 2020-04-20 16:01:52
+ * @LastEditors: crli
+ * @LastEditTime: 2020-04-21 09:50:33
+ * @Description: file content
+ */
 import Vue from 'vue'
-import { login, getInfo, logout } from '@/api/login'
+import { login, getInfo } from '@/api/login'
 import { ACCESS_TOKEN } from '@/store/mutation-types'
 import { welcome } from '@/utils/util'
 
@@ -37,7 +44,7 @@ const user = {
     Login ({ commit }, userInfo) {
       return new Promise((resolve, reject) => {
         login(userInfo).then(response => {
-          const result = response.result
+          const result = response.data
           Vue.ls.set(ACCESS_TOKEN, result.token, 7 * 24 * 60 * 60 * 1000)
           commit('SET_TOKEN', result.token)
           resolve()
@@ -51,7 +58,7 @@ const user = {
     GetInfo ({ commit }) {
       return new Promise((resolve, reject) => {
         getInfo().then(response => {
-          const result = response.result
+          const result = response.data
 
           if (result.role && result.role.permissions.length > 0) {
             const role = result.role
@@ -81,17 +88,9 @@ const user = {
 
     // 登出
     Logout ({ commit, state }) {
-      return new Promise((resolve) => {
-        logout(state.token).then(() => {
-          resolve()
-        }).catch(() => {
-          resolve()
-        }).finally(() => {
-          commit('SET_TOKEN', '')
-          commit('SET_ROLES', [])
-          Vue.ls.remove(ACCESS_TOKEN)
-        })
-      })
+      commit('SET_TOKEN', '')
+      commit('SET_ROLES', [])
+      Vue.ls.remove(ACCESS_TOKEN)
     }
 
   }

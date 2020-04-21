@@ -17,7 +17,7 @@ export const asyncRouterMap = [
         name: 'dashboard',
         redirect: '/dashboard/workplace',
         component: RouteView,
-        meta: { title: '仪表盘', keepAlive: true, icon: bxAnaalyse, permission: [ 'dashboard' ] },
+        meta: { title: '博客管理', keepAlive: true, icon: bxAnaalyse, permission: [ 'dashboard' ] },
         children: [
           {
             path: '/dashboard/analysis',
@@ -26,23 +26,23 @@ export const asyncRouterMap = [
             meta: { title: '分析页', keepAlive: false, permission: [ 'dashboard' ] }
           },
           // 外部链接
-          {
-            path: 'https://www.baidu.com/',
-            name: 'Monitor',
-            meta: { title: '监控页（外部）', target: '_blank' }
-          },
+          // {
+          //   path: 'https://www.baidu.com/',
+          //   name: 'Monitor',
+          //   meta: { title: '监控页（外部）', target: '_blank' }
+          // },
           {
             path: '/dashboard/workplace',
             name: 'Workplace',
             component: () => import('@/views/dashboard/Workplace'),
-            meta: { title: '工作台', keepAlive: true, permission: [ 'dashboard' ] }
-          },
-          {
-            path: '/dashboard/test-work',
-            name: 'TestWork',
-            component: () => import('@/views/dashboard/TestWork'),
-            meta: { title: '测试功能', keepAlive: true, permission: [ 'dashboard' ] }
+            meta: { title: '博客列表', keepAlive: true, permission: [ 'dashboard' ] }
           }
+          // {
+          //   path: '/dashboard/test-work',
+          //   name: 'TestWork',
+          //   component: () => import('@/views/dashboard/TestWork'),
+          //   meta: { title: '测试功能', keepAlive: true, permission: [ 'dashboard' ] }
+          // }
         ]
       },
 
@@ -212,6 +212,7 @@ export const asyncRouterMap = [
         component: RouteView,
         redirect: '/account/center',
         name: 'account',
+        hidden: true,
         meta: { title: '个人页', icon: 'user', keepAlive: true, permission: [ 'user' ] },
         children: [
           {
@@ -268,14 +269,14 @@ export const asyncRouterMap = [
         path: '/other',
         name: 'otherPage',
         component: PageView,
-        meta: { title: '其他组件', icon: 'slack', permission: [ 'dashboard' ] },
+        meta: { title: '其他组件', icon: 'slack', permission: [ 'support' ] },
         redirect: '/other/icon-selector',
         children: [
           {
             path: '/other/icon-selector',
             name: 'TestIconSelect',
             component: () => import('@/views/other/IconSelectorView'),
-            meta: { title: 'IconSelector', icon: 'tool', keepAlive: true, permission: [ 'dashboard' ] }
+            meta: { title: 'IconSelector', icon: 'tool', keepAlive: true, permission: [ 'support' ] }
           },
           {
             path: '/other/list',
