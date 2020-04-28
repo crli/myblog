@@ -36,6 +36,24 @@ export const asyncRouterMap = [
             name: 'Workplace',
             component: () => import('@/views/dashboard/Workplace'),
             meta: { title: '博客列表', keepAlive: true, permission: [ 'dashboard' ] }
+          },
+          {
+            path: '/dashboard/addBlog',
+            name: 'AddBlog',
+            component: () => import('@/views/dashboard/AddBlog'),
+            meta: { title: '写博客', keepAlive: false, permission: [ 'dashboard' ] }
+          },
+          {
+            path: '/dashboard/category',
+            name: 'Category',
+            component: () => import('@/views/dashboard/Category'),
+            meta: { title: '分类管理', keepAlive: false, permission: [ 'dashboard' ] }
+          },
+          {
+            path: '/dashboard/tag',
+            name: 'Tag',
+            component: () => import('@/views/dashboard/Tag'),
+            meta: { title: '标签管理', keepAlive: false, permission: [ 'dashboard' ] }
           }
           // {
           //   path: '/dashboard/test-work',

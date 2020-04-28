@@ -1,3 +1,10 @@
+/*
+ * @Author: crli
+ * @Date: 2020-04-21 09:46:28
+ * @LastEditors: crli
+ * @LastEditTime: 2020-04-22 16:49:03
+ * @Description: file content
+ */
 // chart
 import Bar from '@/components/Charts/Bar'
 import ChartCard from '@/components/Charts/ChartCard'
@@ -28,7 +35,7 @@ import TagSelect from '@/components/TagSelect'
 import ExceptionPage from '@/components/Exception'
 import StandardFormRow from '@/components/StandardFormRow'
 import ArticleListContent from '@/components/ArticleListContent'
-
+import MarkdownEditor from '@/components/Markdown'
 export {
   AvatarList,
   Bar,
@@ -58,5 +65,6 @@ export {
   IconSelector,
   TagSelect,
   StandardFormRow,
-  ArticleListContent
+  ArticleListContent,
+  MarkdownEditor
 }

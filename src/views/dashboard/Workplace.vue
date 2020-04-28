@@ -7,13 +7,13 @@
     <div slot="extra">
       <a-row class="more-info">
         <a-col :span="8">
-          <head-info title="项目" content="56" :center="false" :bordered="false"/>
+          <head-info title="博客" content="56" :center="false" :bordered="false"/>
         </a-col>
         <a-col :span="8">
-          <head-info title="团队排名" content="8/24" :center="false" :bordered="false"/>
+          <head-info title="点赞" content="222" :center="false" :bordered="false"/>
         </a-col>
         <a-col :span="8">
-          <head-info title="项目数" content="2,223" :center="false" />
+          <head-info title="浏览量" content="2323" :center="false" />
         </a-col>
       </a-row>
     </div>
@@ -26,45 +26,29 @@
             :loading="loading"
             style="margin-bottom: 24px;"
             :bordered="false"
-            title="进行中的项目"
+            title="博客列表"
             :body-style="{ padding: 0 }">
-            <a slot="extra">全部项目</a>
+            <!-- <a slot="extra">全部博客</a> -->
+            <a slot="extra" @click="toAddBlog">写博客</a>
             <div>
-              <a-card-grid class="project-card-grid" :key="i" v-for="(item, i) in projects">
-                <a-card :bordered="false" :body-style="{ padding: 0 }">
-                  <a-card-meta>
-                    <div slot="title" class="card-title">
-                      <a-avatar size="small" :src="item.cover"/>
-                      <a>{{ item.title }}</a>
-                    </div>
-                    <div slot="description" class="card-description">
-                      {{ item.description }}
-                    </div>
-                  </a-card-meta>
-                  <div class="project-item">
-                    <a href="/#/">科学搬砖组</a>
-                    <span class="datetime">9小时前</span>
-                  </div>
-                </a-card>
-              </a-card-grid>
+              <div v-for="(item, i) in projects" :key="i" class="blogitem">
+                <div class="blogitemtop">
+                  <span class="origin">{{ item.origin === 0 ? '原创' : item.origin === 1 ? '转载' : '全部' }}</span>
+                  <span class="title">{{ item.title }}</span>
+                </div>
+                <div class="desc">{{ item.content }}</div>
+                <div class="other">
+                  <div class="created">{{ item.created }}</div>
+                  <a-divider type="vertical" />
+                  <div class="views">阅读数 {{ item.views }}</div>
+                  <a-divider type="vertical" />
+                  <div class="likes">赞 {{ item.likes }}</div>
+                </div>
+              </div>
             </div>
           </a-card>
 
-          <a-card :loading="loading" title="动态" :bordered="false">
-            <a-list>
-              <a-list-item :key="index" v-for="(item, index) in activities">
-                <a-list-item-meta>
-                  <a-avatar slot="avatar" :src="item.user.avatar" />
-                  <div slot="title">
-                    <span>{{ item.user.nickname }}</span>&nbsp;
-                    在&nbsp;<a href="#">{{ item.project.name }}</a>&nbsp;
-                    <span>{{ item.project.action }}</span>&nbsp;
-                    <a href="#">{{ item.project.event }}</a>
-                  </div>
-                  <div slot="description">{{ item.time }}</div>
-                </a-list-item-meta>
-              </a-list-item>
-            </a-list>
+          <a-card title="动态" :bordered="false">
           </a-card>
         </a-col>
         <a-col
@@ -74,24 +58,13 @@
           :md="24"
           :sm="24"
           :xs="24">
-          <a-card title="快速开始 / 便捷导航" style="margin-bottom: 24px" :bordered="false" :body-style="{padding: 0}">
-            <div class="item-group">
-              <a>操作一</a>
-              <a>操作二</a>
-              <a>操作三</a>
-              <a>操作四</a>
-              <a>操作五</a>
-              <a>操作六</a>
-              <a-button size="small" type="primary" ghost icon="plus">添加</a-button>
-            </div>
-          </a-card>
-          <a-card title="XX 指数" style="margin-bottom: 24px" :loading="radarLoading" :bordered="false" :body-style="{ padding: 0 }">
+          <a-card title="标签" style="margin-bottom: 24px" :loading="radarLoading" :bordered="false" :body-style="{ padding: 0 }">
             <div style="min-height: 400px;">
               <!-- :scale="scale" :axis1Opts="axis1Opts" :axis2Opts="axis2Opts"  -->
               <radar :data="radarData" />
             </div>
           </a-card>
-          <a-card :loading="loading" title="团队" :bordered="false">
+          <a-card :loading="loading" title="分类" :bordered="false">
             <div class="members">
               <a-row>
                 <a-col :span="12" v-for="(item, index) in teams" :key="index">
@@ -116,9 +89,7 @@ import { mapState } from 'vuex'
 import { PageView } from '@/layouts'
 import HeadInfo from '@/components/tools/HeadInfo'
 import { Radar } from '@/components'
-
-import { getRoleList, getServiceList } from '@/api/manage'
-
+import { getArticleList } from '@/api/article'
 const DataSet = require('@antv/data-set')
 
 export default {
@@ -130,6 +101,7 @@ export default {
   },
   data () {
     return {
+      content: '',
       timeFix: timeFix(),
       avatar: '',
       user: {},
@@ -191,28 +163,24 @@ export default {
   created () {
     this.user = this.userInfo
     this.avatar = this.userInfo.avatar
-
-    getRoleList().then(res => {
-      // console.log('workplace -> call getRoleList()', res)
-    })
-
-    getServiceList().then(res => {
-      // console.log('workplace -> call getServiceList()', res)
-    })
   },
   mounted () {
-    this.getProjects()
-    this.getActivity()
-    this.getTeams()
-    this.initRadar()
+    this.articleList()
+    // this.getActivity()
+    // this.getTeams()
+    // this.initRadar()
   },
   methods: {
-    getProjects () {
-      this.$http.get('/list/search/projects')
-        .then(res => {
-          this.projects = res.result && res.result.data
+    articleList () {
+      getArticleList().then(res => {
+        if (res.code === '0000') {
+          this.projects = res.data && res.data.list
           this.loading = false
-        })
+        }
+      })
+    },
+    toAddBlog () {
+      this.$router.push({ name: 'AddBlog' })
     },
     getActivity () {
       this.$http.get('/workplace/activity')
@@ -248,6 +216,32 @@ export default {
 </script>
 
 <style lang="less" scoped>
+  .blogitem{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    .blogitemtop{
+      display: flex;
+      align-items: center;
+      .origin{
+        color: #ff1111;
+        margin-right: 10px;
+      }
+      .title{
+        font-weight: bold;
+        font-size: 22px;
+      }
+    }
+    .desc{
+      padding: 10px 0;
+    }
+    .other{
+      display: flex;
+      align-items: center;
+    }
+  }
   .project-list {
 
     .card-title {
