@@ -2,7 +2,7 @@
  * @Author: crli
  * @Date: 2020-04-23 11:28:35
  * @LastEditors: crli
- * @LastEditTime: 2020-04-28 16:34:03
+ * @LastEditTime: 2020-04-29 16:58:18
  * @Description: file content
  -->
 <template>
@@ -16,7 +16,7 @@
         <a-button type="primary" @click="saveblog(1)">发布文章</a-button>
       </div>
     </div>
-    <markdown-editor v-model="form.content"/>
+    <markdown-editor v-model="form.content" :value="form.content" ref="markdown"/>
     <a-modal
       title="发布文章"
       centered
@@ -117,11 +117,32 @@ export default {
       articleId: ''
     }
   },
+  watch: {
+    // 初始化hack
+    'form.content': function (val) {
+      this.$refs.markdown.setValue(val)
+    }
+  },
   created () {
     this.articleId = this.$route.query.id
     if (this.articleId) {
-      getArticleDetail(this.articleId).then((res) => {
-
+      getArticleDetail({ articleId: this.articleId }).then((res) => {
+        if (res.code === '0000') {
+          const { title, content, type, state, origin, tags, category } = res.data
+          const tagsarr = []
+          tags.forEach(element => {
+            tagsarr.push(element._id)
+          })
+          this.form = {
+            title,
+            content,
+            type,
+            state,
+            origin,
+            tags: tagsarr,
+            category: category._id
+          }
+        }
       })
     }
   },
@@ -180,7 +201,11 @@ export default {
             }
           }
           console.log(params)
-          fun(params).then((res) => {})
+          fun(params).then((res) => {
+            if (res.code === '0000') {
+              this.$router.push({ name: 'Workplace' })
+            }
+          })
         } else {
           console.log('error submit!!')
           return false

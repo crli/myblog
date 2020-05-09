@@ -28,27 +28,66 @@
             :bordered="false"
             title="博客列表"
             :body-style="{ padding: 0 }">
-            <!-- <a slot="extra">全部博客</a> -->
-            <a slot="extra" @click="toAddBlog">写博客</a>
-            <div>
-              <div v-for="(item, i) in projects" :key="i" class="blogitem">
+            <a slot="extra" @click="articleListMy(userInfo._id)" style="margin-right:10px">我的博客</a>
+            <a slot="extra" @click="articleList" style="margin-right:10px">全部博客</a>
+            <a slot="extra" @click="toAddBlog" v-if="userInfo._id ">写博客</a>
+            <div style="background: #eee">
+              <div v-for="(item, i) in blogs" :key="i" class="blogitem">
                 <div class="blogitemtop">
                   <span class="origin">{{ item.origin === 0 ? '原创' : item.origin === 1 ? '转载' : '全部' }}</span>
                   <span class="title">{{ item.title }}</span>
                 </div>
-                <div class="desc">{{ item.content }}</div>
+                <div class="desc" v-html="item.html"></div>
                 <div class="other">
-                  <div class="created">{{ item.created }}</div>
-                  <a-divider type="vertical" />
-                  <div class="views">阅读数 {{ item.views }}</div>
-                  <a-divider type="vertical" />
-                  <div class="likes">赞 {{ item.likes }}</div>
+                  <div class="otherleft">
+                    <div class="created">{{ item.created }}</div>
+                    <a-divider type="vertical" />
+                    <div class="views">阅读数 {{ item.views }}</div>
+                    <a-divider type="vertical" />
+                    <div class="likes">赞 {{ item.likes }}</div>
+                    <a-divider type="vertical" />
+                    <div class="likes">作者 {{ item.name }}</div>
+                  </div>
+                  <div class="btns" v-if="item.userid === userInfo._id ">
+                    <a-button type="primary" @click="changeblog(item._id)">修改</a-button>
+                    <a-button type="danger" style="margin-left:10px" @click="delblog(item._id)">删除</a-button>
+                  </div>
                 </div>
               </div>
             </div>
           </a-card>
 
-          <a-card title="动态" :bordered="false">
+          <a-card
+            class="project-list"
+            :loading="loading"
+            style="margin-bottom: 24px;"
+            :bordered="false"
+            title="草稿列表"
+            :body-style="{ padding: 0 }">
+            <div style="background: #eee">
+              <div v-for="(item, i) in drafts" :key="i" class="blogitem">
+                <div class="blogitemtop">
+                  <span class="origin">{{ item.origin === 0 ? '原创' : item.origin === 1 ? '转载' : '全部' }}</span>
+                  <span class="title">{{ item.title }}</span>
+                </div>
+                <div class="desc" v-html="item.html"></div>
+                <div class="other">
+                  <div class="otherleft">
+                    <div class="created">{{ item.created }}</div>
+                    <a-divider type="vertical" />
+                    <div class="views">阅读数 {{ item.views }}</div>
+                    <a-divider type="vertical" />
+                    <div class="likes">赞 {{ item.likes }}</div>
+                    <a-divider type="vertical" />
+                    <div class="likes">作者 {{ item.name }}</div>
+                  </div>
+                  <div class="btns" v-if="item.userid === userInfo._id ">
+                    <a-button type="primary" @click="changeblog(item._id)">修改</a-button>
+                    <a-button type="danger" style="margin-left:10px" @click="delblog(item._id)">删除</a-button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </a-card>
         </a-col>
         <a-col
@@ -58,22 +97,14 @@
           :md="24"
           :sm="24"
           :xs="24">
-          <a-card title="标签" style="margin-bottom: 24px" :loading="radarLoading" :bordered="false" :body-style="{ padding: 0 }">
-            <div style="min-height: 400px;">
-              <!-- :scale="scale" :axis1Opts="axis1Opts" :axis2Opts="axis2Opts"  -->
-              <radar :data="radarData" />
+          <a-card :loading="loading" title="分类" :bordered="false" style="margin-bottom: 24px">
+            <div>
+              <a-tag v-for="(v) in categorys" :key="v._id" style="cursor: pointer;" @click="getCategoryById(v._id)">{{ v.name }}</a-tag>
             </div>
           </a-card>
-          <a-card :loading="loading" title="分类" :bordered="false">
-            <div class="members">
-              <a-row>
-                <a-col :span="12" v-for="(item, index) in teams" :key="index">
-                  <a>
-                    <a-avatar size="small" :src="item.avatar" />
-                    <span class="member">{{ item.name }}</span>
-                  </a>
-                </a-col>
-              </a-row>
+          <a-card title="标签" :bordered="false">
+            <div>
+              <a-tag v-for="(v) in tags" :key="v._id" style="cursor: pointer;" @click="getTagById(v._id)">{{ v.name }}</a-tag>
             </div>
           </a-card>
         </a-col>
@@ -88,16 +119,16 @@ import { mapState } from 'vuex'
 
 import { PageView } from '@/layouts'
 import HeadInfo from '@/components/tools/HeadInfo'
-import { Radar } from '@/components'
-import { getArticleList } from '@/api/article'
-const DataSet = require('@antv/data-set')
+import { getArticleList, deleteArticle } from '@/api/article'
+import marked from 'marked'
+import { getCategoryList } from '@/api/category'
+import { getTagList } from '@/api/tag'
 
 export default {
   name: 'Workplace',
   components: {
     PageView,
-    HeadInfo,
-    Radar
+    HeadInfo
   },
   data () {
     return {
@@ -105,50 +136,12 @@ export default {
       timeFix: timeFix(),
       avatar: '',
       user: {},
-
-      projects: [],
+      drafts: [],
+      blogs: [],
       loading: true,
       radarLoading: true,
-      activities: [],
-      teams: [],
-
-      // data
-      axis1Opts: {
-        dataKey: 'item',
-        line: null,
-        tickLine: null,
-        grid: {
-          lineStyle: {
-            lineDash: null
-          },
-          hideFirstLine: false
-        }
-      },
-      axis2Opts: {
-        dataKey: 'score',
-        line: null,
-        tickLine: null,
-        grid: {
-          type: 'polygon',
-          lineStyle: {
-            lineDash: null
-          }
-        }
-      },
-      scale: [{
-        dataKey: 'score',
-        min: 0,
-        max: 80
-      }],
-      axisData: [
-        { item: '引用', a: 70, b: 30, c: 40 },
-        { item: '口碑', a: 60, b: 70, c: 40 },
-        { item: '产量', a: 50, b: 60, c: 40 },
-        { item: '贡献', a: 40, b: 50, c: 40 },
-        { item: '热度', a: 60, b: 70, c: 40 },
-        { item: '引用', a: 70, b: 50, c: 40 }
-      ],
-      radarData: []
+      tags: [],
+      categorys: []
     }
   },
   computed: {
@@ -166,15 +159,49 @@ export default {
   },
   mounted () {
     this.articleList()
-    // this.getActivity()
-    // this.getTeams()
-    // this.initRadar()
+    this.getCategory()
+    this.getTag()
   },
   methods: {
-    articleList () {
-      getArticleList().then(res => {
+    getCategory () {
+      getCategoryList({
+        pageNum: 1,
+        pageSize: 1000
+      }).then((res) => {
         if (res.code === '0000') {
-          this.projects = res.data && res.data.list
+          this.categorys = res.data.list
+        }
+      })
+    },
+    getTag () {
+      getTagList({
+        pageNum: 1,
+        pageSize: 1000
+      }).then((res) => {
+        if (res.code === '0000') {
+          this.tags = res.data.list
+        }
+      })
+    },
+    articleList (parmas = {}) {
+      getArticleList(parmas).then(res => {
+        if (res.code === '0000') {
+          const arr = res.data && res.data.list
+          const blogArr = []
+          const draftArr = []
+          arr.forEach(ele => {
+            const str = ele.content.length > 150 ? '...' : ''
+            ele.html = marked(ele.content.substr(0, 150) + str, {
+              sanitize: true
+            })
+            if (ele.state === 1) {
+              blogArr.push(ele)
+            } else {
+              draftArr.push(ele)
+            }
+          })
+          this.blogs = blogArr
+          this.drafts = draftArr
           this.loading = false
         }
       })
@@ -182,34 +209,33 @@ export default {
     toAddBlog () {
       this.$router.push({ name: 'AddBlog' })
     },
-    getActivity () {
-      this.$http.get('/workplace/activity')
-        .then(res => {
-          this.activities = res.result
-        })
-    },
-    getTeams () {
-      this.$http.get('/workplace/teams')
-        .then(res => {
-          this.teams = res.result
-        })
-    },
-    initRadar () {
-      this.radarLoading = true
-
-      this.$http.get('/workplace/radar')
-        .then(res => {
-          const dv = new DataSet.View().source(res.result)
-          dv.transform({
-            type: 'fold',
-            fields: ['个人', '团队', '部门'],
-            key: 'user',
-            value: 'score'
+    delblog (id) {
+      const self = this
+      this.$confirm({
+        content: '确定删除？',
+        onOk () {
+          deleteArticle({ articleId: id, userid: self.$store.state.user.info._id }).then(res => {
+            if (res.code === '0000') {
+              self.$message.success(res.msg)
+              self.articleList()
+            } else {
+              self.$message.error(res.msg)
+            }
           })
-
-          this.radarData = dv.rows
-          this.radarLoading = false
-        })
+        }
+      })
+    },
+    changeblog (id) {
+      this.$router.push({ name: 'AddBlog', query: { id } })
+    },
+    getTagById (id) {
+      this.articleList({ tagid: id })
+    },
+    getCategoryById (id) {
+      this.articleList({ categoryid: id })
+    },
+    articleListMy (id) {
+      this.articleList({ userid: id })
     }
   }
 }
@@ -221,7 +247,11 @@ export default {
     flex-direction: column;
     justify-content: space-between;
     padding: 10px;
-    border-bottom: 1px solid #eee;
+    background: #fff;
+    margin-bottom: 10px;
+    &:first-child{
+      border-top: 1px solid #eee;
+    }
     .blogitemtop{
       display: flex;
       align-items: center;
@@ -240,6 +270,11 @@ export default {
     .other{
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      .otherleft{
+        display: flex;
+        align-items: center;
+      }
     }
   }
   .project-list {

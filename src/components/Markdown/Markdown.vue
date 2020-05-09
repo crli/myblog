@@ -2,7 +2,7 @@
  * @Author: crli
  * @Date: 2020-04-22 16:28:17
  * @LastEditors: crli
- * @LastEditTime: 2020-04-23 10:25:50
+ * @LastEditTime: 2020-04-29 17:01:53
  * @Description: file content
  -->
 <template>
@@ -69,6 +69,14 @@ export default {
       })
       this.editor.codemirror.on('blur', () => {
         this.$emit('on-blur', this.editor.value())
+      })
+    },
+    // 初始化hack
+    setValue () {
+      this.$nextTick(() => {
+        if (!this.editor.value()) {
+          this.editor.value(this.value)
+        }
       })
     }
   },
