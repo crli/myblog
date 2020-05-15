@@ -44,6 +44,12 @@ export const asyncRouterMap = [
             meta: { title: '写博客', keepAlive: false, permission: [ 'dashboard' ] }
           },
           {
+            path: '/dashboard/blogDetails',
+            name: 'BlogDetails',
+            component: () => import('@/views/dashboard/blogDetails'),
+            meta: { title: '博客详情', keepAlive: false, permission: [ 'dashboard' ] }
+          },
+          {
             path: '/dashboard/category',
             name: 'Category',
             component: () => import('@/views/dashboard/Category'),

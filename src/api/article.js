@@ -2,7 +2,7 @@
  * @Author: crli
  * @Date: 2020-04-23 10:56:02
  * @LastEditors: crli
- * @LastEditTime: 2020-04-23 11:04:02
+ * @LastEditTime: 2020-05-15 14:10:04
  * @Description: file content
  */
 import { axios } from '@/utils/request'
@@ -44,6 +44,20 @@ export function getArticleDetail (parameter) {
 export function likeArticle (parameter) {
   return axios({
     url: `/article/likeArticle`,
+    method: 'post',
+    data: parameter
+  })
+}
+export function getHotArticleList (parameter) {
+  return axios({
+    url: `/article/getHotArticleList`,
+    method: 'post',
+    data: parameter
+  })
+}
+export function getArchive (parameter) {
+  return axios({
+    url: `/article/getArchive`,
     method: 'post',
     data: parameter
   })

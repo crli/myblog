@@ -33,7 +33,7 @@
             <a slot="extra" @click="toAddBlog" v-if="userInfo._id ">写博客</a>
             <div style="background: #eee">
               <div v-for="(item, i) in blogs" :key="i" class="blogitem">
-                <div class="blogitemtop">
+                <div class="blogitemtop" @click="toDetails(item._id)">
                   <span class="origin">{{ item.origin === 0 ? '原创' : item.origin === 1 ? '转载' : '全部' }}</span>
                   <span class="title">{{ item.title }}</span>
                 </div>
@@ -42,11 +42,11 @@
                   <div class="otherleft">
                     <div class="created">{{ item.created }}</div>
                     <a-divider type="vertical" />
-                    <div class="views">阅读数 {{ item.views }}</div>
+                    <div class="views"><a-icon type="eye" /> {{ item.views }}</div>
                     <a-divider type="vertical" />
-                    <div class="likes">赞 {{ item.likes }}</div>
+                    <div class="likes"><a-icon type="heart" theme="twoTone" two-tone-color="#eb2f96" /> {{ item.likes }}</div>
                     <a-divider type="vertical" />
-                    <div class="likes">作者 {{ item.name }}</div>
+                    <div class="likes"><a-icon type="user" /> {{ item.name }}</div>
                   </div>
                   <div class="btns" v-if="item.userid === userInfo._id ">
                     <a-button type="primary" @click="changeblog(item._id)">修改</a-button>
@@ -75,11 +75,11 @@
                   <div class="otherleft">
                     <div class="created">{{ item.created }}</div>
                     <a-divider type="vertical" />
-                    <div class="views">阅读数 {{ item.views }}</div>
+                    <div class="views"><a-icon type="eye" /> {{ item.views }}</div>
                     <a-divider type="vertical" />
-                    <div class="likes">赞 {{ item.likes }}</div>
+                    <div class="likes"><a-icon type="heart" theme="twoTone" two-tone-color="#eb2f96" /> {{ item.likes }}</div>
                     <a-divider type="vertical" />
-                    <div class="likes">作者 {{ item.name }}</div>
+                    <div class="likes"><a-icon type="user" /> {{ item.name }}</div>
                   </div>
                   <div class="btns" v-if="item.userid === userInfo._id ">
                     <a-button type="primary" @click="changeblog(item._id)">修改</a-button>
@@ -102,9 +102,25 @@
               <a-tag v-for="(v) in categorys" :key="v._id" style="cursor: pointer;" @click="getCategoryById(v._id)">{{ v.name }}</a-tag>
             </div>
           </a-card>
-          <a-card title="标签" :bordered="false">
+          <a-card title="标签" :bordered="false" style="margin-bottom: 24px">
             <div>
               <a-tag v-for="(v) in tags" :key="v._id" style="cursor: pointer;" @click="getTagById(v._id)">{{ v.name }}</a-tag>
+            </div>
+          </a-card>
+          <a-card title="归档" :bordered="false" style="margin-bottom: 24px">
+            <div v-for="(item, i) in archive" :key="i" class="archive">
+              <div class="title">{{ item.year }}</div>
+              <div class="times">
+                <div class="time" v-for="(val, key) in item.time" :key="key" @click="getTimeArchive(item.year, val.month)">
+                  <a-tag style="cursor: pointer;">{{ val.month + '月' }}</a-tag>
+                  <a-tag style="cursor: pointer;">{{ val.count + '篇' }}</a-tag>
+                </div>
+              </div>
+            </div>
+          </a-card>
+          <a-card title="热门文章" :bordered="false">
+            <div v-for="(item, i) in hot" :key="i" class="archive">
+              {{ item.title }} <a-icon type="eye" /> {{ item.views }}
             </div>
           </a-card>
         </a-col>
@@ -119,7 +135,7 @@ import { mapState } from 'vuex'
 
 import { PageView } from '@/layouts'
 import HeadInfo from '@/components/tools/HeadInfo'
-import { getArticleList, deleteArticle } from '@/api/article'
+import { getArticleList, deleteArticle, getHotArticleList, getArchive } from '@/api/article'
 import marked from 'marked'
 import { getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
@@ -141,7 +157,10 @@ export default {
       loading: true,
       radarLoading: true,
       tags: [],
-      categorys: []
+      categorys: [],
+      archive: [
+      ],
+      hot: []
     }
   },
   computed: {
@@ -161,6 +180,8 @@ export default {
     this.articleList()
     this.getCategory()
     this.getTag()
+    this.getHot()
+    this.getArchiveList()
   },
   methods: {
     getCategory () {
@@ -236,6 +257,26 @@ export default {
     },
     articleListMy (id) {
       this.articleList({ userid: id })
+    },
+    toDetails (id) {
+      this.$router.push({ name: 'BlogDetails', query: { id } })
+    },
+    getHot () {
+      getHotArticleList({ userid: this.user._id, likes: 1 }).then(res => {
+        if (res.code === '0000') {
+          this.hot = res.data
+        }
+      })
+    },
+    getArchiveList () {
+      getArchive({ userid: this.user._id }).then(res => {
+        if (res.code === '0000') {
+          this.archive = res.data
+        }
+      })
+    },
+    getTimeArchive (year, month) {
+      this.articleList({ year, month, userid: this.userInfo._id })
     }
   }
 }
@@ -253,8 +294,12 @@ export default {
       border-top: 1px solid #eee;
     }
     .blogitemtop{
+      cursor: pointer;
       display: flex;
       align-items: center;
+      &:hover{
+        color: #52c41a;
+      }
       .origin{
         color: #ff1111;
         margin-right: 10px;
@@ -387,5 +432,19 @@ export default {
       display: none;
     }
   }
-
+.archive{
+  margin-bottom: 10px;
+  .title{
+    margin-bottom: 10px;
+  }
+  .times{
+    display: flex;
+    .time{
+      width: 25%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}
 </style>
