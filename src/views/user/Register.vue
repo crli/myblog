@@ -222,7 +222,7 @@ export default {
           state.passwordLevelChecked = false
           register({ email, password }).then((res) => {
             if (res.code === '0000') {
-              this.toLogin({ email, password })
+              this.$router.push({ name: 'login' })
             } else {
               alert(res.msg)
             }

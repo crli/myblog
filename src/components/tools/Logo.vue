@@ -1,3 +1,10 @@
+<!--
+ * @Author: crli
+ * @Date: 2020-04-21 09:46:28
+ * @LastEditors: crli
+ * @LastEditTime: 2020-05-21 16:15:52
+ * @Description: file content
+-->
 <template>
   <div class="logo">
     <router-link :to="{name:'dashboard'}">
@@ -18,7 +25,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: 'Ant Design Pro',
+      default: 'crlin',
       required: false
     },
     showTitle: {

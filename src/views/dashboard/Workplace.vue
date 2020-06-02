@@ -1,10 +1,10 @@
 <template>
-  <page-view :avatar="avatar" :title="false">
-    <div slot="headerContent">
+  <page-view :avatar="user._id === '5ec63e1c693692343497e800' ? '' : avatar" :title="false">
+    <div slot="headerContent" v-if="user._id !== '5ec63e1c693692343497e800'">
       <div class="title">{{ timeFix }}，{{ user.name }}<span class="welcome-text">，{{ welcome }}</span></div>
       <div>前端工程师 | 蚂蚁金服 - 某某某事业群 - VUE平台</div>
     </div>
-    <div slot="extra">
+    <div slot="extra" v-if="user._id !== '5ec63e1c693692343497e800'">
       <a-row class="more-info">
         <a-col :span="8">
           <head-info title="博客" content="56" :center="false" :bordered="false"/>
@@ -28,7 +28,7 @@
             :bordered="false"
             title="博客列表"
             :body-style="{ padding: 0 }">
-            <a slot="extra" @click="articleListMy(userInfo._id)" style="margin-right:10px">我的博客</a>
+            <a slot="extra" @click="articleListMy(userInfo._id)" style="margin-right:10px" v-if="user._id !== '5ec63e1c693692343497e800'">我的博客</a>
             <a slot="extra" @click="articleList" style="margin-right:10px">全部博客</a>
             <a slot="extra" @click="toAddBlog" v-if="userInfo._id ">写博客</a>
             <div style="background: #eee">
@@ -58,6 +58,7 @@
           </a-card>
 
           <a-card
+            v-if="user._id !== '5ec63e1c693692343497e800'"
             class="project-list"
             :loading="loading"
             style="margin-bottom: 24px;"
@@ -107,7 +108,7 @@
               <a-tag v-for="(v) in tags" :key="v._id" style="cursor: pointer;" @click="getTagById(v._id)">{{ v.name }}</a-tag>
             </div>
           </a-card>
-          <a-card title="归档" :bordered="false" style="margin-bottom: 24px">
+          <a-card title="归档" :bordered="false" style="margin-bottom: 24px" v-if="user._id !== '5ec63e1c693692343497e800'">
             <div v-for="(item, i) in archive" :key="i" class="archive">
               <div class="title">{{ item.year }}</div>
               <div class="times">
@@ -118,11 +119,7 @@
               </div>
             </div>
           </a-card>
-          <a-card title="热门文章" :bordered="false">
-            <div v-for="(item, i) in hot" :key="i" class="archive">
-              {{ item.title }} <a-icon type="eye" /> {{ item.views }}
-            </div>
-          </a-card>
+          <HotArticle v-if="user._id !== '5ec63e1c693692343497e800'"></HotArticle>
         </a-col>
       </a-row>
     </div>
@@ -135,7 +132,8 @@ import { mapState } from 'vuex'
 
 import { PageView } from '@/layouts'
 import HeadInfo from '@/components/tools/HeadInfo'
-import { getArticleList, deleteArticle, getHotArticleList, getArchive } from '@/api/article'
+import HotArticle from './hotArticle.vue'
+import { getArticleList, deleteArticle, getArchive } from '@/api/article'
 import marked from 'marked'
 import { getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
@@ -144,7 +142,8 @@ export default {
   name: 'Workplace',
   components: {
     PageView,
-    HeadInfo
+    HeadInfo,
+    HotArticle
   },
   data () {
     return {
@@ -159,8 +158,7 @@ export default {
       tags: [],
       categorys: [],
       archive: [
-      ],
-      hot: []
+      ]
     }
   },
   computed: {
@@ -180,8 +178,9 @@ export default {
     this.articleList()
     this.getCategory()
     this.getTag()
-    this.getHot()
-    this.getArchiveList()
+    if (this.user._id !== '5ec63e1c693692343497e800') {
+      this.getArchiveList()
+    }
   },
   methods: {
     getCategory () {
@@ -261,17 +260,11 @@ export default {
     toDetails (id) {
       this.$router.push({ name: 'BlogDetails', query: { id } })
     },
-    getHot () {
-      getHotArticleList({ userid: this.user._id, likes: 1 }).then(res => {
-        if (res.code === '0000') {
-          this.hot = res.data
-        }
-      })
-    },
     getArchiveList () {
       getArchive({ userid: this.user._id }).then(res => {
         if (res.code === '0000') {
           this.archive = res.data
+          console.log(1)
         }
       })
     },

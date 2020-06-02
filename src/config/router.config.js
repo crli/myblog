@@ -34,6 +34,7 @@ export const asyncRouterMap = [
           {
             path: '/dashboard/workplace',
             name: 'Workplace',
+            hidden: true,
             component: () => import('@/views/dashboard/Workplace'),
             meta: { title: '博客列表', keepAlive: true, permission: [ 'dashboard' ] }
           },
@@ -46,30 +47,39 @@ export const asyncRouterMap = [
           {
             path: '/dashboard/blogDetails',
             name: 'BlogDetails',
+            hidden: true,
             component: () => import('@/views/dashboard/blogDetails'),
             meta: { title: '博客详情', keepAlive: false, permission: [ 'dashboard' ] }
-          },
-          {
-            path: '/dashboard/category',
-            name: 'Category',
-            component: () => import('@/views/dashboard/Category'),
-            meta: { title: '分类管理', keepAlive: false, permission: [ 'dashboard' ] }
-          },
-          {
-            path: '/dashboard/tag',
-            name: 'Tag',
-            component: () => import('@/views/dashboard/Tag'),
-            meta: { title: '标签管理', keepAlive: false, permission: [ 'dashboard' ] }
           }
-          // {
-          //   path: '/dashboard/test-work',
-          //   name: 'TestWork',
-          //   component: () => import('@/views/dashboard/TestWork'),
-          //   meta: { title: '测试功能', keepAlive: true, permission: [ 'dashboard' ] }
-          // }
         ]
       },
-
+      {
+        path: '/blog',
+        name: 'blog',
+        redirect: '/blog/analysis',
+        component: RouteView,
+        meta: { title: '平台管理', keepAlive: true, icon: bxAnaalyse, permission: [ 'blog' ] },
+        children: [
+          {
+            path: '/blog/analysis',
+            name: 'Analysis',
+            component: () => import('@/views/blog/Analysis'),
+            meta: { title: '分析页', keepAlive: false, permission: [ 'blog' ] }
+          },
+          {
+            path: '/blog/category',
+            name: 'Category',
+            component: () => import('@/views/blog/Category'),
+            meta: { title: '分类管理', keepAlive: false, permission: [ 'blog' ] }
+          },
+          {
+            path: '/blog/tag',
+            name: 'Tag',
+            component: () => import('@/views/blog/Tag'),
+            meta: { title: '标签管理', keepAlive: false, permission: [ 'blog' ] }
+          }
+        ]
+      },
       // forms
       {
         path: '/form',
