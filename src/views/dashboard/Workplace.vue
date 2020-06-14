@@ -1,10 +1,10 @@
 <template>
-  <page-view :avatar="user._id === '5ec63e1c693692343497e800' ? '' : avatar" :title="false">
-    <div slot="headerContent" v-if="user._id !== '5ec63e1c693692343497e800'">
+  <page-view :avatar="user.email === 'youke@qq.com' ? '' : avatar" :title="false">
+    <div slot="headerContent" v-if="user.email !== 'youke@qq.com'">
       <div class="title">{{ timeFix }}，{{ user.name }}<span class="welcome-text">，{{ welcome }}</span></div>
       <div>前端工程师 | 蚂蚁金服 - 某某某事业群 - VUE平台</div>
     </div>
-    <div slot="extra" v-if="user._id !== '5ec63e1c693692343497e800'">
+    <div slot="extra" v-if="user.email !== 'youke@qq.com'">
       <a-row class="more-info">
         <a-col :span="8">
           <head-info title="博客" content="56" :center="false" :bordered="false"/>
@@ -28,7 +28,7 @@
             :bordered="false"
             title="博客列表"
             :body-style="{ padding: 0 }">
-            <a slot="extra" @click="articleListMy(userInfo._id)" style="margin-right:10px" v-if="user._id !== '5ec63e1c693692343497e800'">我的博客</a>
+            <a slot="extra" @click="articleListMy(userInfo._id)" style="margin-right:10px" v-if="user.email !== 'youke@qq.com'">我的博客</a>
             <a slot="extra" @click="articleList" style="margin-right:10px">全部博客</a>
             <a slot="extra" @click="toAddBlog" v-if="userInfo._id ">写博客</a>
             <div style="background: #eee">
@@ -58,7 +58,7 @@
           </a-card>
 
           <a-card
-            v-if="user._id !== '5ec63e1c693692343497e800'"
+            v-if="user.email !== 'youke@qq.com'"
             class="project-list"
             :loading="loading"
             style="margin-bottom: 24px;"
@@ -108,7 +108,7 @@
               <a-tag v-for="(v) in tags" :key="v._id" style="cursor: pointer;" @click="getTagById(v._id)">{{ v.name }}</a-tag>
             </div>
           </a-card>
-          <a-card title="归档" :bordered="false" style="margin-bottom: 24px" v-if="user._id !== '5ec63e1c693692343497e800'">
+          <a-card title="归档" :bordered="false" style="margin-bottom: 24px" v-if="user.email !== 'youke@qq.com'">
             <div v-for="(item, i) in archive" :key="i" class="archive">
               <div class="title">{{ item.year }}</div>
               <div class="times">
@@ -119,7 +119,7 @@
               </div>
             </div>
           </a-card>
-          <HotArticle v-if="user._id !== '5ec63e1c693692343497e800'"></HotArticle>
+          <HotArticle v-if="user.email !== 'youke@qq.com'"></HotArticle>
         </a-col>
       </a-row>
     </div>
@@ -128,7 +128,7 @@
 
 <script>
 import { timeFix } from '@/utils/util'
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 
 import { PageView } from '@/layouts'
 import HeadInfo from '@/components/tools/HeadInfo'
@@ -178,11 +178,12 @@ export default {
     this.articleList()
     this.getCategory()
     this.getTag()
-    if (this.user._id !== '5ec63e1c693692343497e800') {
+    if (this.user.email !== 'youke@qq.com') {
       this.getArchiveList()
     }
   },
   methods: {
+    ...mapActions(['Logout']),
     getCategory () {
       getCategoryList({
         pageNum: 1,
@@ -227,7 +228,30 @@ export default {
       })
     },
     toAddBlog () {
-      this.$router.push({ name: 'AddBlog' })
+      const _this = this
+      if (this.userInfo.email === 'youke@qq.com') {
+        this.$confirm({
+          title: '写博客?',
+          content: '去登录',
+          onOk () {
+            return _this.Logout({}).then(() => {
+              setTimeout(() => {
+                window.location.reload()
+              }, 16)
+            }).catch(err => {
+              _this.$message.error({
+                title: '错误',
+                description: err.message
+              })
+            })
+          },
+          onCancel () {
+
+          }
+        })
+      } else {
+        this.$router.push({ name: 'AddBlog' })
+      }
     },
     delblog (id) {
       const self = this
