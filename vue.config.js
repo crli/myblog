@@ -28,6 +28,7 @@ const assetsCDN = {
 
 // vue.config.js
 const vueConfig = {
+  publicPath: isProd ? '/blog/': '/',
   configureWebpack: {
     // webpack plugins
     plugins: [
