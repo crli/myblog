@@ -96,7 +96,7 @@ const vueConfig = {
       //   changeOrigin: true
       // }
       [process.env.VUE_APP_API_BASE_URL]: {
-        target: `http://192.168.2.4:3000`,
+        target: `http://localhost:3000`,
         changeOrigin: true,
         // logLevel: 'debug',
         pathRewrite: {
